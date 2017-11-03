@@ -153,7 +153,8 @@ extern CCriticalSection cs_vAddedNodes;
 
 extern NodeId nLastNodeId;
 extern CCriticalSection cs_nLastNodeId;
-
+extern SSL_CTX *tls_ctx_server;
+extern SSL_CTX *tls_ctx_client;
 struct LocalServiceInfo {
     int nScore;
     int nPort;
@@ -167,6 +168,8 @@ class CNodeStats
 public:
     NodeId nodeid;
     uint64_t nServices;
+    bool fTLSEstablished;
+    bool fTLSVerified;
     int64_t nLastSend;
     int64_t nLastRecv;
     int64_t nTimeConnected;
@@ -236,6 +239,7 @@ public:
     // socket
     uint64_t nServices;
     SOCKET hSocket;
+    CCriticalSection cs_hSocket;
     CDataStream ssSend;
     size_t nSendSize; // total size of all vSendMsg entries
     size_t nSendOffset; // offset inside the first vSendMsg already sent
@@ -324,7 +328,7 @@ public:
     // Whether a ping is requested.
     bool fPingQueued;
 
-    CNode(SOCKET hSocketIn, const CAddress &addrIn, const std::string &addrNameIn = "", bool fInboundIn = false);
+    CNode(SOCKET hSocketIn, const CAddress &addrIn, const std::string &addrNameIn = "", bool fInboundIn = false, SSL *sslIn = NULL);
     ~CNode();
 
 private:

@@ -394,6 +394,12 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += HelpMessageOpt("-timeout=<n>", strprintf(_("Specify connection timeout in milliseconds (minimum: 1, default: %d)"), DEFAULT_CONNECT_TIMEOUT));
     strUsage += HelpMessageOpt("-torcontrol=<ip>:<port>", strprintf(_("Tor control port to use if onion listening enabled (default: %s)"), DEFAULT_TOR_CONTROL));
     strUsage += HelpMessageOpt("-torpassword=<pass>", _("Tor control port password (default: empty)"));
+
+    strUsage += HelpMessageOpt("-tlskeypath=<path>", _("Full path to a private key"));
+    strUsage += HelpMessageOpt("-tlskeypwd=<password>", _("Password for a private key encryption (default: not set, i.e. private key will be stored unencrypted)"));
+    strUsage += HelpMessageOpt("-tlscertpath=<path>", _("Full path to a certificate"));
+    strUsage += HelpMessageOpt("-tlstrustdir=<path>", _("Full path to a trusted certificates directory"));
+    strUsage += HelpMessageOpt("-tlsvalidate=<0 or 1>", _("Connect to peers only with valid certificates (default: 0)"));
     strUsage += HelpMessageOpt("-whitebind=<addr>", _("Bind to given address and whitelist peers connecting to it. Use [host]:port notation for IPv6"));
     strUsage += HelpMessageOpt("-whitelist=<netmask>", _("Whitelist peers connecting from the given netmask or IP address. Can be specified multiple times.") +
         " " + _("Whitelisted peers cannot be DoS banned and their transactions are always relayed, even if they are already in the mempool, useful e.g. for a gateway"));
@@ -682,7 +688,7 @@ static void ZC_LoadParams()
         uiInterface.ThreadSafeMessageBox(strprintf(
             _("Cannot find the Hush network parameters in the following directory:\n"
               "%s\n"
-              "Please run 'zcash-fetch-params' or './zcutil/fetch-params.sh' and then restart."),
+              "Please run 'hush-fetch-params' or './zcutil/fetch-params.sh' and then restart."),
                 ZC_GetParamsDir()),
             "", CClientUIInterface::MSG_ERROR);
         StartShutdown();
@@ -1251,6 +1257,12 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
             return InitError(_("Failed to listen on any port. Use -listen=0 if you want this."));
     }
 
+    	if (mapArgs.count("-tlstrustdir")) {
+            boost::filesystem::path pathTLSTrustredDir(GetArg("-tlstrustdir", ""));
+            if (!boost::filesystem::exists(pathTLSTrustredDir))
+                return InitError(strprintf(_("Cannot find trusted certificates directory: '%s'"), pathTLSTrustredDir.string()));
+        }
+
     if (mapArgs.count("-externalip")) {
         BOOST_FOREACH(const std::string& strAddr, mapMultiArgs["-externalip"]) {
             CService addrLocal(strAddr, GetListenPort(), fNameLookup);
@@ -1488,10 +1500,10 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
                 InitWarning(msg);
             }
             else if (nLoadWalletRet == DB_TOO_NEW)
-                strErrors << _("Error loading wallet.dat: Wallet requires newer version of Zcash") << "\n";
+                strErrors << _("Error loading wallet.dat: Wallet requires newer version of Hush") << "\n";
             else if (nLoadWalletRet == DB_NEED_REWRITE)
             {
-                strErrors << _("Wallet needed to be rewritten: restart Zcash to complete") << "\n";
+                strErrors << _("Wallet needed to be rewritten: restart Hush to complete") << "\n";
                 LogPrintf("%s", strErrors.str());
                 return InitError(strErrors.str());
             }
