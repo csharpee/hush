@@ -1,3 +1,4 @@
 usr/bin/hushd
 usr/bin/hush-cli
+usr/bin/hush-tx
 usr/bin/hush-fetch-params

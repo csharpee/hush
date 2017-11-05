@@ -40,6 +40,7 @@ chmod 0755 -R $BUILD_DIR/*
 # Copy binaries
 cp $SRC_PATH/src/hushd $DEB_BIN
 cp $SRC_PATH/src/hush-cli $DEB_BIN
+cp $SRC_PATH/src/hush-tx $DEB_BIN
 cp $SRC_PATH/zcutil/fetch-params.sh $DEB_BIN/hush-fetch-params
 # Copy docs
 cp $SRC_PATH/doc/release-notes/release-notes-1.0.9.md $DEB_DOC/changelog
@@ -49,15 +50,18 @@ cp -r $SRC_DEB/examples $DEB_DOC
 # Copy manpages
 cp $SRC_DOC/man/hushd.1 $DEB_MAN
 cp $SRC_DOC/man/hush-cli.1 $DEB_MAN
+cp $SRC_DOC/man/hush-tx.1 $DEB_MAN
 cp $SRC_DOC/man/hush-fetch-params.1 $DEB_MAN
 # Copy bash completion files
 cp $SRC_PATH/contrib/bitcoind.bash-completion $DEB_CMP/hushd
 cp $SRC_PATH/contrib/bitcoin-cli.bash-completion $DEB_CMP/hush-cli
+cp $SRC_PATH/contrib/bitcoin-cli.bash-completion $DEB_CMP/hush-tx
 # Gzip files
 gzip --best -n $DEB_DOC/changelog
 gzip --best -n $DEB_DOC/changelog.Debian
 gzip --best -n $DEB_MAN/hushd.1
 gzip --best -n $DEB_MAN/hush-cli.1
+gzip --best -n $DEB_MAN/hush-tx.1
 gzip --best -n $DEB_MAN/hush-fetch-params.1
 
 cd $SRC_PATH/contrib
