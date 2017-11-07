@@ -1314,6 +1314,7 @@ static void AcceptConnection(const ListenSocket& hListenSocket) {
     }
 #endif // USE_TLS
 
+    CNode* pnode = new CNode(hSocket, addr, "", true, ssl);
     pnode->AddRef();
     pnode->fWhitelisted = whitelisted;
 
