@@ -394,7 +394,6 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += HelpMessageOpt("-timeout=<n>", strprintf(_("Specify connection timeout in milliseconds (minimum: 1, default: %d)"), DEFAULT_CONNECT_TIMEOUT));
     strUsage += HelpMessageOpt("-torcontrol=<ip>:<port>", strprintf(_("Tor control port to use if onion listening enabled (default: %s)"), DEFAULT_TOR_CONTROL));
     strUsage += HelpMessageOpt("-torpassword=<pass>", _("Tor control port password (default: empty)"));
-
     strUsage += HelpMessageOpt("-tlskeypath=<path>", _("Full path to a private key"));
     strUsage += HelpMessageOpt("-tlskeypwd=<password>", _("Password for a private key encryption (default: not set, i.e. private key will be stored unencrypted)"));
     strUsage += HelpMessageOpt("-tlscertpath=<path>", _("Full path to a certificate"));
@@ -1256,6 +1255,17 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         if (!fBound)
             return InitError(_("Failed to listen on any port. Use -listen=0 if you want this."));
     }
+		if (mapArgs.count("-tlskeypath")) {
+			boost::filesystem::path pathTLSKey(GetArg("-tlskeypath", ""));
+		if (!boost::filesystem::exists(pathTLSKey))
+			 return InitError(strprintf(_("Cannot find TLS key file: '%s'"), pathTLSKey.string()));
+		}
+
+		if (mapArgs.count("-tlscertpath")) {
+			boost::filesystem::path pathTLSCert(GetArg("-tlscertpath", ""));
+		if (!boost::filesystem::exists(pathTLSCert))
+			return InitError(strprintf(_("Cannot find TLS cert file: '%s'"), pathTLSCert.string()));
+		}
 
     	if (mapArgs.count("-tlstrustdir")) {
             boost::filesystem::path pathTLSTrustredDir(GetArg("-tlstrustdir", ""));

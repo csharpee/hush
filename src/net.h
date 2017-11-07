@@ -18,6 +18,8 @@
 #include "sync.h"
 #include "uint256.h"
 #include "utilstrencodings.h"
+#include <openssl/bio.h>
+#include <openssl/ssl.h>
 
 #include <deque>
 #include <stdint.h>
@@ -236,7 +238,10 @@ public:
 class CNode
 {
 public:
-    // socket
+    // OpenSSL
+	SSL *ssl;
+
+	// socket
     uint64_t nServices;
     SOCKET hSocket;
     CCriticalSection cs_hSocket;
