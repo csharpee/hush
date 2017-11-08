@@ -222,7 +222,7 @@ int printStats(bool mining)
         std::cout << "           " << _("Block height") << " | " << height << std::endl;
     }
     std::cout << "            " << _("Public Connections") << " | " << connections << std::endl;
-    std::cout << "            " << _("Secure Connections") << " |  (TLS: " << tlsConnections << ")" << std::endl;
+    std::cout << "            " << _("Secure TLS Connections") << " | " << tlsConnections << std::endl;
     std::cout << "  " << _("Network solution rate") << " | " << netsolps << " Sol/s" << std::endl;
     if (mining && miningTimer.running()) {
         std::cout << "    " << _("Local solution rate") << " | " << strprintf("%.4f Sol/s", localsolps) << std::endl;
