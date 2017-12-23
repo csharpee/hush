@@ -367,7 +367,7 @@ UniValue getaddressesbyaccount(const UniValue& params, bool fHelp)
     return ret;
 }
 
-static void SendMoney(const CTxDestination &address, CAmount nValue, bool fSubtractFeeFromAmount, CWalletTx& wtxNew)
+static void SendMoney(const CScript &scriptPubKey, CAmount nValue, bool fSubtractFeeFromAmount, CWalletTx& wtxNew)
 {
     CAmount curBalance = pwalletMain->GetBalance();
 
@@ -379,7 +379,7 @@ static void SendMoney(const CTxDestination &address, CAmount nValue, bool fSubtr
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient funds");
 
     // Parse Hush address
-    CScript scriptPubKey = GetScriptForDestination(address);
+    //CScript scriptPubKey = GetScriptForDestination(address);
 
     // Create and send the transaction
     CReserveKey reservekey(pwalletMain);
@@ -451,7 +451,48 @@ UniValue sendtoaddress(const UniValue& params, bool fHelp)
 
     EnsureWalletIsUnlocked();
 
-    SendMoney(address.Get(), nAmount, fSubtractFeeFromAmount, wtx);
+    SendMoney(GetScriptForDestination(address.Get()), nAmount, fSubtractFeeFromAmount, wtx);
+
+        return wtx.GetHash().GetHex();
+    }
+
+    UniValue z_embedstring(const UniValue& params, bool fHelp)
+    {
+        if (!EnsureWalletIsAvailable(fHelp))
+            return NullUniValue;
+
+        if (fHelp || params.size() != 2)
+            throw runtime_error(
+                "z_embedstring \"string-to-embed\" amount\n"
+                "\nEmbed a string into the blockchain (requires paying a fee).\n"
+                + HelpRequiringPassphrase() +
+                "\nArguments:\n"
+                "1. \"string-to-embed\"  (string, required) The string to embed into the blockchain.\n"
+                "2. \"amount\"      (numeric, required) The amount in zcash to burn (not including fee). eg 0.0001\n"
+                "\nResult:\n"
+                "\"transactionid\"  (string) The transaction id.\n"
+                "\nExamples:\n"
+                + HelpExampleCli("z_embedstring", "\"Hello, world!")
+            );
+
+        LOCK2(cs_main, pwalletMain->cs_wallet);
+
+        // String to embed
+        std::string string_to_embed = params[0].get_str();
+        std::vector<unsigned char> bytes_to_embed(string_to_embed.begin(), string_to_embed.end());
+
+        // Amount
+        // TODO: Are zero-valued TXOUTs disallowed by consensus, or can we safely
+        // remove the 'amount' from this RPC and always have zero-value TXOUT?
+        CAmount nAmount = AmountFromValue(params[1]);
+        if (nAmount <= 0)
+            throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount for send");
+
+        EnsureWalletIsUnlocked();
+
+        CWalletTx wtx;
+        CScript opreturn;
+    SendMoney(CScript() << OP_RETURN << bytes_to_embed, nAmount, false, wtx);
 
     return wtx.GetHash().GetHex();
 }
@@ -931,7 +972,7 @@ UniValue sendfrom(const UniValue& params, bool fHelp)
     if (nAmount > nBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Account has insufficient funds");
 
-    SendMoney(address.Get(), nAmount, false, wtx);
+    SendMoney(GetScriptForDestination(address.Get()), nAmount, false, wtx);
 
     return wtx.GetHash().GetHex();
 }
